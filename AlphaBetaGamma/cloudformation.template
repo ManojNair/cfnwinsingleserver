@@ -90,30 +90,19 @@
                                 "waitAfterCompletion" : "0"
                             }
                         }
-                    },
-                    "finalize"   : {
-                        "commands" : {
-                            "a-signal-success" : {
-                                "command" : {
-                                    "Fn::Join" : [
-                                        "",
-                                        [
-                                            "cfn-signal.exe -e 0 \"",
-                                            {
-                                                "Ref" : "WindowsServerWaitHandle"
-                                            },
-                                            "\""
-                                        ]
-                                    ]
-                                }
-                            }
-                        }
                     }
                 }
             },
-            "Properties" : {
+            "CreationPolicy" : {
+                "ResourceSignal" : {
+                    "Count" : 1,
+                    "Timeout" : "PT5M"
+                }
+            },
+            "Properties"     : {
                 "ImageId" : "ami-899eafea",
                 "InstanceType" : "c4.2xlarge",
+                "KeyName"      : "ManojNair_Sydney",
                 "SecurityGroups" : [
                     {
                         "Ref" : "MySG"
@@ -135,6 +124,15 @@
                                     "Ref" : "AWS::Region"
                                 },
                                 "\n",
+                                "cfn-signal.exe -e 0 --stack \"",
+                                {
+                                    "Ref" : "AWS::StackName"
+                                },
+                                "\" --resource \"WindowsServer\" --region \"",
+                                {
+                                    "Ref" : "AWS::Region"
+                                },
+                                "\"",
                                 "</script>\n"
                             ]
                         ]
@@ -142,20 +140,7 @@
                 }
             }
         },
-        "WindowsServerWaitCondition" : {
-            "Type" : "AWS::CloudFormation::WaitCondition",
-            "DependsOn" : "WindowsServer",
-            "Properties" : {
-                "Handle" : {
-                    "Ref" : "WindowsServerWaitHandle"
-                },
-                "Timeout" : "3600"
-            }
-        },
-        "WindowsServerWaitHandle"    : {
-            "Type" : "AWS::CloudFormation::WaitConditionHandle"
-        },
-        "MySG"                       : {
+        "MySG"          : {
             "Type" : "AWS::EC2::SecurityGroup",
             "Properties" : {
                 "GroupDescription" : "Allow HTTP and RDP",
